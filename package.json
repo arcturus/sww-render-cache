@@ -12,6 +12,7 @@
     "vinyl-source-stream": "latest"
   },
   "dependencies": {
-    "sw-cache-helper": "git+https://git@github.com/arcturus/sw-cache-helper.git"
+    "sw-cache-helper": "git+https://git@github.com/arcturus/sw-cache-helper.git",
+    "threads": "git+https://github.com/gaia-components/threads.git"
   }
 }
