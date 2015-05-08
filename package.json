@@ -1,0 +1,17 @@
+{
+  "name": "RenderCache",
+  "version": "0.0.1",
+  "devDependencies": {
+    "browserify": "latest",
+    "gulp": "latest",
+    "gulp-jshint": "latest",
+    "gulp-sourcemaps": "latest",
+    "gulp-watch": "latest",
+    "gulp-webserver": "latest",
+    "vinyl-buffer": "latest",
+    "vinyl-source-stream": "latest"
+  },
+  "dependencies": {
+    "sw-cache-helper": "git+https://git@github.com/arcturus/sw-cache-helper.git"
+  }
+}
