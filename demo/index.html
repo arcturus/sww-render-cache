@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Raw Cache Test</title>
+  <script src="../node_modules/threads/threads.min.js"></script>
+</head>
+<body>
+<script>
+  if (navigator.serviceWorker) {
+    navigator.serviceWorker.getRegistration().then(function(reg) {
+      if (!reg) {
+        navigator.serviceWorker.register('./sw.js');
+      }
+    });
+  } else {
+    alert('No SW present :(');
+  }
+
+  var client = threads.client('RenderCache');
+
+  function addContent(url, content) {
+    client.method('addHtml', url, content).then(dumpGeneratedFiles);
+  }
+
+  function removeContent(url) {
+    client.method('remove', url).then(dumpGeneratedFiles);
+  }
+
+  function dumpGeneratedFiles() {
+    var content = document.getElementById('content');
+    content.innerHTML = '';
+
+    client.method('listContent').then(function(requests) {
+      if (requests.length === 0) {
+        return;
+      }
+      var ul = document.createElement('ul');
+
+      requests.forEach(function(request) {
+        var url = request.url;
+        var li = document.createElement('li');
+        li.innerHTML = '<a href="'+ url +'" target="_blank">' + url + '</a>&nbsp;<a href="javascript:removeContent(\'' + url + '\')">[x]</a>';
+        ul.appendChild(li);
+      });
+      content.appendChild(ul);
+    });
+  }
+
+  function process() {
+    var newUrl = document.getElementById('newUrl');
+    var url = newUrl.value.trim();
+    if (!url) {
+      alert('Invalid url');
+      return;
+    }
+    var newContent = document.getElementById('newContent');
+    var content = newContent.value.trim();
+    if (!content) {
+      alert('Invalid content');
+    }
+
+    addContent(url, content);
+  }
+  var myOrigin = document.location.toString().substr(0,
+    document.location.toString().lastIndexOf('/') + 1);
+  window.addEventListener('DOMContentLoaded', dumpGeneratedFiles);
+</script>
+<body>
+<section id="content">
+</section>
+<section id="control">
+  <h2>Content generation</h2>
+  <script>document.write(myOrigin);</script>
+  <input type="text" size=40 id="newUrl"><br/>
+  <textarea cols=80 rows=10 id="newContent"></textarea></br/>
+  <button onClick="process()">create content</button><br/>
+  (be careful and don't overwrite the index.html ;))
+</section>
+</body>
+</html>
