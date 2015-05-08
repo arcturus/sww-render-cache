@@ -3,21 +3,23 @@
 <head>
   <meta charset="utf-8">
   <title>Raw Cache Test</title>
-  <script src="../node_modules/threads/threads.min.js"></script>
+  <script src="../node_modules/threads/threads.js"></script>
 </head>
 <body>
 <script>
   if (navigator.serviceWorker) {
     navigator.serviceWorker.getRegistration().then(function(reg) {
       if (!reg) {
-        navigator.serviceWorker.register('./sw.js');
+        navigator.serviceWorker.register('./sw.js').then(function() {
+          document.location.reload();
+        });
       }
     });
   } else {
     alert('No SW present :(');
   }
 
-  var client = threads.client('RenderCache');
+  var client = null;
 
   function addContent(url, content) {
     client.method('addHtml', url, content).then(dumpGeneratedFiles);
@@ -64,7 +66,10 @@
   }
   var myOrigin = document.location.toString().substr(0,
     document.location.toString().lastIndexOf('/') + 1);
-  window.addEventListener('DOMContentLoaded', dumpGeneratedFiles);
+  window.addEventListener('DOMContentLoaded', function() {
+    client = threads.client('RenderCacheService');
+    dumpGeneratedFiles()
+  });
 </script>
 <body>
 <section id="content">

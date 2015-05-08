@@ -4,7 +4,7 @@ var RenderCache = require('./lib/RenderCache.js');
 self.RenderCache = RenderCache;
 
 },{"./lib/RenderCache.js":2}],2:[function(require,module,exports){
-/* globals caches, Request, Response */
+/* globals caches, Request, Response, Promise */
 'use strict';
 
 var threads = require('threads');
@@ -31,15 +31,16 @@ RenderCache.prototype._openCache = function _openCache() {
 };
 
 /**
- *
- * @param request
- * @returns {*}
+ * Respond to fetch event, check internally if our cache has a matching
+ * url.
+ * @param request (Request) the requested url
+ * @returns {Promise} Promise resolved with the cached element or null
+ * if this cache doesn't contain anything for the requested url.
  */
 RenderCache.prototype.onFetch = function onFetch(request) {
   return this._openCache().then(function(cache) {
-    return cache.match(request, {
-      ignoreSearch: false,
-      ignoreMethod: true
+    return cache.match(request).then(function(response) {
+      return response !== null ? Promise.resolve(response) : null;
     });
   });
 };
@@ -56,9 +57,9 @@ RenderCache.prototype.createService = function createService() {
       listContent: [],
       evict: [],
       remove: ['string'],
-      add: ['string', 'Object', 'Object'],
+      add: ['string', 'object', 'object'],
       addHtml: ['string', 'string'],
-      addPng: ['string', 'Blob']
+      addPng: ['string', 'blob']
     }
   });
   // Add the methods
@@ -121,9 +122,9 @@ RenderCache.prototype.remove = function remove(url) {
  */
 RenderCache.prototype.add = function add(url, headers, content) {
   return this._openCache().then(function(cache) {
-    return cache.put(new Request(url, {
+    return cache.put(new Request(url), new Response(content, {
       headers: headers
-    }), new Response(content));
+    }));
   });
 };
 
@@ -188,7 +189,7 @@ module.exports = ChildThread;
  * @type {Function}
  */
 
-var debug = 0 ? console.log.bind(console, '[ChildThread]') : function() {};
+var debug = 1 ? console.log.bind(console, '[ChildThread]') : function() {};
 
 /**
  * Extends `Emitter`
@@ -598,7 +599,7 @@ var manager = new BroadcastChannel('threadsmanager');
  * @type {Function}
  */
 
-var debug = 0 ? console.log.bind(console, '[Client]') : function() {};
+var debug = 1 ? console.log.bind(console, '[Client]') : function() {};
 
 /**
  * Extends `Emitter`
@@ -922,7 +923,7 @@ module.exports = ClientStream;
  * @type {Function}
  */
 
-var debug = 0 ? console.log.bind(console, '[ClientStream]') : function() {};
+var debug = 1 ? console.log.bind(console, '[ClientStream]') : function() {};
 
 /**
  * Readable stream instance returned by
@@ -1073,7 +1074,7 @@ module.exports = Emitter;
  * @type {Function}
  */
 
-var debug = 0 ? console.log.bind(console, '[Emitter]') : function(){};
+var debug = 1 ? console.log.bind(console, '[Emitter]') : function(){};
 
 /**
  * Create new `Emitter`
@@ -1171,7 +1172,7 @@ module.exports = Manager;
  *
  * @type {Function}
  */
-var debug = 0 ? console.log.bind(console, '[Manager]') : function() {};
+var debug = 1 ? console.log.bind(console, '[Manager]') : function() {};
 
 /**
  * Global 'manager' channel
@@ -1369,7 +1370,7 @@ var utils = require('./utils');
  * @type {Function}
  */
 
-var debug = 0 ? console.log.bind(console, '[Messenger]') : function() {};
+var debug = 1 ? console.log.bind(console, '[Messenger]') : function() {};
 
 /**
  * Exports
@@ -1788,7 +1789,7 @@ exports.Stream = ServiceStream; // for testing
  * @type {Function}
  */
 
-var debug = 0 ? console.log.bind(console, '[Service]') : function(){};
+var debug = 1 ? console.log.bind(console, '[Service]') : function(){};
 
 /**
  * Global broadcast channel that
@@ -2202,7 +2203,7 @@ module.exports = ServiceStream;
  * @type {Function}
  */
 
-var debug = 0 ? console.log.bind(console, '[ServiceStream]') : function() {};
+var debug = 1 ? console.log.bind(console, '[ServiceStream]') : function() {};
 
 /**
  * Writable Stream instance passed to the
@@ -2380,7 +2381,7 @@ var utils = require('./utils');
  * @type {Function}
  */
 
-var debug = 0 ? console.log.bind(console, '[ThreadGlobal]') : function() {};
+var debug = 1 ? console.log.bind(console, '[ThreadGlobal]') : function() {};
 
 /**
  * Extend `Emitter`
